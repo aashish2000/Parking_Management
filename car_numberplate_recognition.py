@@ -109,8 +109,8 @@ def licence_plate_ocr(licence_image, ocr_net, ocr_meta, ocr_threshold, ocr_net_w
 
 # Initialize Vehicle Detection Model
 vehicle_threshold = .5
-vehicle_weights = b'../yolov4/yolov4-tiny.weights'
-vehicle_netcfg  = b'../yolov4/yolov4-tiny.cfg'
+vehicle_weights = b'./data/vehicle-detector/yolov4-tiny.weights'
+vehicle_netcfg  = b'./data/vehicle-detector/yolov4-tiny.cfg'
 vehicle_dataset = b'./darknet/cfg/coco.data'
 
 vehicle_net  = darknet.darknet.load_net(vehicle_netcfg, vehicle_weights, 0)
