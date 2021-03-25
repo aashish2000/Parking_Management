@@ -1,5 +1,4 @@
 # Parking_Management
-Parking Management System
 
 ## Table of contents
 * [About](#about)
