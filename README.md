@@ -57,6 +57,7 @@ cd darknet && make
 python car_numberplate_recognition.py $IMAGE_DIR
 ```
 
+To test out the repository on Google Colab, [click on this link](https://colab.research.google.com/drive/1QljiKUGbN4uaLOo8leRWZYxHummz376k?usp=sharing)
 ## References
 
 - Vehicle Detection: <https://arxiv.org/abs/2011.04244>
