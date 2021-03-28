@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    
+    <title>Parking Management</title>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    
+    
+    <script>
+        function loading(button_id1) {
+            document.getElementById(button_id1).innerHTML = '<div class="ispinner white large animating">'+
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '<div class="ispinner-blade"></div>' +
+                '</div>';
+        }
+        
+        // document.getElementById("btn").addEventListener("click", function(){
+        //     loading("loader1");
+        // }, true);
+
+        // document.getElementById("sub_button").addEventListener("click", function(){
+        //     loading("loader2","loader1");
+        // }, true);
+            
+    </script>
+
+    <script type="text/javascript"> 
+        $(document).ready(function() { 
+            $("#btn").click(function() { 
+                loading("loader1");
+                var fd = new FormData(); 
+                var files = $('#fileToUpload')[0].files[0]; 
+                fd.append('fileToUpload', files); 
+    
+                $.ajax({ 
+                    url: '/video_upload', 
+                    type: 'post', 
+                    data: fd,  
+                    contentType: false,
+                    processData: false,
+                    success: function(data){
+                        var filename = $('input[type=file]').val().replace(/C:\\fakepath\\/i, '');
+                        var split_files = filename.split(".");
+                        var len_file = split_files.length;
+                        var new_filename = split_files.slice(0, len_file-1).join(".") + ".mp4";
+                        $("#video_player").html("<source src='/static/uploaded_videos/"+new_filename+"' type='video/webm'>");
+                        $("#file_name").val(filename);
+                        $("#process_form").toggle();
+                        $("#loader1").html("")
+                    }, 
+                }); 
+            });
+        }); 
+
+    </script>
+
+
+    <style>
+        .ispinner {
+        position: relative;
+        width: 20px;
+        height: 20px; }
+        .ispinner .ispinner-blade {
+            position: absolute;
+            top: 6.5px;
+            left: 8.5px;
+            width: 2.5px;
+            height: 6.5px;
+            background-color: #4b4b52;
+            border-radius: 1.25px;
+            animation: iSpinnerBlade 1s linear infinite;
+            will-change: opacity; }
+            .ispinner .ispinner-blade:nth-child(1) {
+            transform: rotate(45deg) translateY(-6.5px);
+            animation-delay: -1.625s; }
+            .ispinner .ispinner-blade:nth-child(2) {
+            transform: rotate(90deg) translateY(-6.5px);
+            animation-delay: -1.5s; }
+            .ispinner .ispinner-blade:nth-child(3) {
+            transform: rotate(135deg) translateY(-6.5px);
+            animation-delay: -1.375s; }
+            .ispinner .ispinner-blade:nth-child(4) {
+            transform: rotate(180deg) translateY(-6.5px);
+            animation-delay: -1.25s; }
+            .ispinner .ispinner-blade:nth-child(5) {
+            transform: rotate(225deg) translateY(-6.5px);
+            animation-delay: -1.125s; }
+            .ispinner .ispinner-blade:nth-child(6) {
+            transform: rotate(270deg) translateY(-6.5px);
+            animation-delay: -1s; }
+            .ispinner .ispinner-blade:nth-child(7) {
+            transform: rotate(315deg) translateY(-6.5px);
+            animation-delay: -0.875s; }
+            .ispinner .ispinner-blade:nth-child(8) {
+            transform: rotate(360deg) translateY(-6.5px);
+            animation-delay: -0.75s; }
+        .ispinner.ispinner-large {
+            width: 35px;
+            height: 35px; }
+            .ispinner.ispinner-large .ispinner-blade {
+            top: 11.5px;
+            left: 15px;
+            width: 5px;
+            height: 12px;
+            border-radius: 2.5px; }
+            .ispinner.ispinner-large .ispinner-blade:nth-child(1) {
+                transform: rotate(45deg) translateY(-11.5px); }
+            .ispinner.ispinner-large .ispinner-blade:nth-child(2) {
+                transform: rotate(90deg) translateY(-11.5px); }
+            .ispinner.ispinner-large .ispinner-blade:nth-child(3) {
+                transform: rotate(135deg) translateY(-11.5px); }
+            .ispinner.ispinner-large .ispinner-blade:nth-child(4) {
+                transform: rotate(180deg) translateY(-11.5px); }
+            .ispinner.ispinner-large .ispinner-blade:nth-child(5) {
+                transform: rotate(225deg) translateY(-11.5px); }
+            .ispinner.ispinner-large .ispinner-blade:nth-child(6) {
+                transform: rotate(270deg) translateY(-11.5px); }
+            .ispinner.ispinner-large .ispinner-blade:nth-child(7) {
+                transform: rotate(315deg) translateY(-11.5px); }
+            .ispinner.ispinner-large .ispinner-blade:nth-child(8) {
+                transform: rotate(360deg) translateY(-11.5px); }
+
+        @keyframes iSpinnerBlade {
+        0% {
+            opacity: 0.85; }
+        50% {
+            opacity: 0.25; }
+        100% {
+            opacity: 0.25; } }
+
+        html {
+            height: 100%;
+            font-family: 'Open Sans', sans-serif;
+            background-color: #eeeeee
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        video {
+            width: 35%    !important;
+            height: auto   !important;
+        }
+
+        .center-div-nn{
+    		text-align: center;
+    		display: flex;
+    		justify-content: center;
+    		align-items: center;
+        }
+
+        .padding-nn{
+    		padding:10px;
+        }
+        
+        .rborder{
+    		margin: 10px;
+            border-radius: 15px;
+            background: #80808052;
+            ;
+        }
+        
+        input{
+            border-radius: 10px;
+            font-weight: 700;
+    	}
+    </style>
+</head>
+
+<body>
+    <div class="center-div-nn padding-nn">
+        <form method="post" onsubmit="return false;">
+
+            <h1 class="padding-nn">Parking Management and Vehicle Location Tracking</h1>
+            
+            <div class="rborder padding-nn">
+                <label for="fileToUpload"> Select the Video Feed: </label>
+                <input type="file" class="rborder" name="fileToUpload" id="fileToUpload">
+            </div>
+
+            <div>
+                <input id="btn" class="rborder padding-nn" type="button" value="Upload Video" name="submit">
+                <center><div id = "loader1" name="loader1" class="padding-nn"></div></center>
+            </div>
+
+        </form>
+    </div>
+
+
+    <div>
+        <form hidden action="/process" name="process_form" id="process_form" method="post" onsubmit="loading('loader2');">
+            
+            <center>
+                <div>
+                    <video autoplay controls id="video_player" name="video_player"></video>
+                </div>
+
+                <div>
+                    <input type="hidden" id="file_name" name="file_name">
+                    <input id="sub_button" name="sub_button" type="submit" value="Process Video" class="rborder padding-nn">
+                   <div id = "loader2" name="loader2" class="padding-nn"></div>
+                </div>
+            
+            </center>
+
+        </form>
+    </div>
+     
+</body>
+
+</html>

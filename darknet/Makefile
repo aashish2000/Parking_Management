@@ -1,9 +1,10 @@
-GPU=1
-CUDNN=1
+NUMPY=1
+GPU=0
+CUDNN=0
 CUDNN_HALF=0
 OPENCV=0
 AVX=0
-OPENMP=1
+OPENMP=0
 LIBSO=1
 ZED_CAMERA=0
 ZED_CAMERA_v2_8=0
@@ -138,6 +139,13 @@ ifeq ($(CUDNN_HALF), 1)
 COMMON+= -DCUDNN_HALF
 CFLAGS+= -DCUDNN_HALF
 ARCH+= -gencode arch=compute_70,code=[sm_70,compute_70]
+endif
+
+ifeq ($(NUMPY), 1) 
+NPPATH = $(shell python3 -c "import os; import numpy; print(os.path.dirname(numpy.__file__))")
+PYINCL = $(shell python3 -c "from sysconfig import get_paths; print(get_paths()['include'])")
+COMMON+= -DNUMPY -I$(PYINCL)/ -I$(NPPATH)/core/include/numpy/
+CFLAGS+= -DNUMPY
 endif
 
 ifeq ($(ZED_CAMERA), 1)

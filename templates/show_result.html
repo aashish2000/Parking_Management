@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Management</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    
+    <style>
+
+        html {
+            height: 100%;
+            font-family: 'Open Sans', sans-serif;
+            background-color: #eeeeee
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .center-div-nn{
+    		text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+    		justify-content: center;
+    		align-items: center;
+        }
+
+        video {
+            width: 65%    !important;
+            height: auto   !important;
+        }
+
+        .padding-nn{
+    		padding:10px;
+        }
+        
+        .rborder{
+    		margin: 10px;
+            border-radius: 15px;
+            background: #80808052;
+            ;
+        }
+        
+        input{
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        
+        .break {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class = "center-div-nn padding-nn">
+
+        <form action="/download" method="post" enctype="application/x-www-form-urlencoded">
+
+            <h1 class="padding-nn">Parking Management and Vehicle Location Tracking</h1>
+
+            <div>
+                <input type="hidden" id="file_name" name="file_name" value={{ result_path }}>
+            </div>
+
+            <div class="break"></div>
+
+            <!-- <div>
+                <h3> Total No of Heads in the Video: </h3> <h3>{{ head_count }} </h3>
+            </div> -->
+
+            <div>
+                <video autoplay controls id="video_player" name="video_player">
+                    <source src={{ ['/static/results/', result_path] | join('') }} type="video/webm">
+                </video>
+            </div>
+            
+            <div>
+                <input id="btn" class="rborder padding-nn" type="submit" value="Download Processed Video" name="down">
+                <a href="/" class="rborder padding-nn">Back</a>
+            </div>
+
+        </form>
+
+    </div> 
+
+    
+</body>
+</html>

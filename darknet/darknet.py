@@ -178,8 +178,16 @@ def detect_image(network, class_names, image, thresh=.5, hier_thresh=.5, nms=.45
     return sorted(predictions, key=lambda x: x[1])
 
 # Custom Function ################################################################
+def nparray_to_image(img):
+    data = img.ctypes.data_as(POINTER(c_ubyte))
+    image = ndarray_image(data, img.ctypes.shape, img.ctypes.strides)
+
+    return image
+
 def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
-    im = load_image(image, 0, 0)
+    # im = load_image(image, 0, 0)
+    im = nparray_to_image(image)
+    
     num = c_int(0)
     pnum = pointer(num)
     predict_image(net, im)
@@ -262,6 +270,12 @@ if hasGPU:
     set_gpu.argtypes = [c_int]
 
 init_cpu = lib.init_cpu
+
+# Custom Function ###########################################################
+ndarray_image = lib.ndarray_to_image
+ndarray_image.argtypes = [POINTER(c_ubyte), POINTER(c_long), POINTER(c_long)]
+ndarray_image.restype = IMAGE
+#############################################################################
 
 make_image = lib.make_image
 make_image.argtypes = [c_int, c_int, c_int]
