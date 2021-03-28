@@ -34,6 +34,7 @@ def load_model(path,custom_objects={},verbose=0):
 		model_json = json_file.read()
 	model = model_from_json(model_json, custom_objects=custom_objects)
 	model.load_weights('%s.h5' % path)
+	model._make_predict_function()
 	if verbose: print('Loaded from %s' % path)
 	return model
 

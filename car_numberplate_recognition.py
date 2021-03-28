@@ -156,18 +156,18 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
     start = datetime.datetime.now()
     save_path = 'output-{}.webm'.format(datetime.datetime.timestamp(start))
 
-    vehicle_net_width = darknet.darknet.network_width(vehicle_net)
-    vehicle_net_height = darknet.darknet.network_height(vehicle_net)
-
     cap = cv2.VideoCapture(video_path)
-    save = cv2.VideoWriter("./static/results/"+save_path, cv2.VideoWriter_fourcc('V','P','8','0'), 30, (vehicle_net_width,vehicle_net_height))
 
     identified_cars_numberplates = {}
+    
     frame = None
     if cap.isOpened():
         hasFrame, frame = cap.read()
     else:
         hasFrame = False
+    
+    video_height, video_width = frame.shape[:2]
+    save = cv2.VideoWriter("./static/results/"+save_path, cv2.VideoWriter_fourcc('V','P','8','0'), 30, (video_width,video_height))
 
     while hasFrame:
         image_original = frame
@@ -175,7 +175,7 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
         # Perform Vehicle Detection
         detected_cars, vehicle_bbox_image = vehicle_detection(image_original, vehicle_net, vehicle_meta)
 
-
+        print("FRAME")
         if len(detected_cars):
             for i, cropped_car in enumerate(detected_cars):
                 # Perform Licence Plate Detection for every detected vehicle
@@ -192,9 +192,16 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
                     # Perform Licence Plate Character Recognition
                     licence_str = licence_plate_ocr(licence_plate, ocr_net, ocr_meta)
                     identified_cars_numberplates[licence_str] = cropped_car[0].decode('ascii')
-                    draw_licence_plate(cropped_car, vehicle_bbox_image, licence_str)
+                    vehicle_bbox_image = draw_licence_plate(cropped_car, vehicle_bbox_image, licence_str)
+                    
+        # vehicle_bbox_image = cv2.cvtColor(vehicle_bbox_image, cv2.COLOR_RGB2BGR)
+        # vehicle_bbox_image = vehicle_bbox_image.astype(np.uint8)
+
+        # cv2.imshow("window",vehicle_bbox_image)
+        # if cv2.waitKey() & 0xFF == ord('q'):
+        #     break
         
-        save.write(frame)
+        save.write(vehicle_bbox_image)
         hasFrame, frame = cap.read()
 
     cap.release()
