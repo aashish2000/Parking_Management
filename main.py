@@ -1,12 +1,12 @@
 
 import os, subprocess
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from asgiref.sync import sync_to_async
-from fastapi.middleware.cors import CORSMiddleware
-from car_numberplate_recognition import initialize_weights, vehicle_detection_video
+from fastapi                        import FastAPI, Request, Form
+from fastapi.responses              import HTMLResponse, FileResponse
+from fastapi.staticfiles            import StaticFiles
+from fastapi.templating             import Jinja2Templates
+from asgiref.sync                   import sync_to_async
+from fastapi.middleware.cors        import CORSMiddleware
+from car_numberplate_recognition    import initialize_weights, vehicle_detection_video
 
 # Add Environment Variable for instructing the system to run inference on GPU
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -30,6 +30,11 @@ templates = Jinja2Templates(directory="templates")
 # Display Home Webpage
 @app.get("/", response_class=HTMLResponse)
 async def display_home(request: Request):
+    # Delete old videos from Server
+    os.remove("./static/uploaded_videos/*.mp4")
+    os.remove("./static/results/*.mp4")
+
+    # Return Home Page from templates
     return templates.TemplateResponse("home.html", {"request": request})
 
 # Upload and Play Videos

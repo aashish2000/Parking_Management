@@ -1,21 +1,57 @@
 
 import numpy as np
 import cv2
-import sys
 
-from glob import glob
+def IOU_labels(l1,l2):
+	return IOU(l1.tl(),l1.br(),l2.tl(),l2.br())
 
+def draw_boxes(detections, image):
+    '''
+    Draws Bounding Boxes for all 
+    detected vehicles in frame
+    '''
+    for label, confidence, bbox in detections:
+        left, top, right, bottom = bbox2points(bbox)
+        cv2.rectangle(image, (left, top), (right, bottom), (0,255,0), 1)
+        cv2.putText(image, "{}".format(label.decode('ascii')),
+                    (left, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                    (0,0,255), 2)
+    return image
+
+def draw_licence_plate(car_detection, image, licence_str):
+    '''
+    Writes Licence Plate String of
+    given car inside its Bounding Box
+    '''
+    left, top, right, bottom = bbox2points(car_detection[2])
+    cv2.putText(image, "{}".format(licence_str), ((left+right)//2, (top+bottom)//2), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255), 2)
+    return image
+
+def bbox2points(bbox):
+    '''
+    From bounding box yolo format
+    to corner points cv2 rectangle
+    '''
+    x, y, w, h = bbox
+    xmin = int(round(x - (w / 2)))
+    xmax = int(round(x + (w / 2)))
+    ymin = int(round(y - (h / 2)))
+    ymax = int(round(y + (h / 2)))
+    return xmin, ymin, xmax, ymax
 
 def im2single(I):
+	'''
+	Normailze pixel values in image
+	'''
 	assert(I.dtype == 'uint8')
 	return I.astype('float32')/255.
 
-
-def getWH(shape):
-	return np.array(shape[1::-1]).astype(float)
-
-
 def IOU(tl1,br1,tl2,br2):
+	'''
+	Calculates the amount of overlap 
+	between	2 given Bounding Boxes 
+	'''
+
 	wh1,wh2 = br1-tl1,br2-tl2
 	assert((wh1>=.0).all() and (wh2>=.0).all())
 	
@@ -25,17 +61,7 @@ def IOU(tl1,br1,tl2,br2):
 	union_area = area1 + area2 - intersection_area;
 	return intersection_area/union_area
 
-
-def IOU_labels(l1,l2):
-	return IOU(l1.tl(),l1.br(),l2.tl(),l2.br())
-
-
-def IOU_centre_and_dims(cc1,wh1,cc2,wh2):
-	return IOU(cc1-wh1/2.,cc1+wh1/2.,cc2-wh2/2.,cc2+wh2/2.)
-
-
 def nms(Labels,iou_threshold=.5):
-
 	SelectedLabels = []
 	Labels.sort(key=lambda l: l.prob(),reverse=True)
 	
@@ -52,23 +78,11 @@ def nms(Labels,iou_threshold=.5):
 
 	return SelectedLabels
 
-
-def image_files_from_folder(folder,upper=True):
-	extensions = ['jpg','jpeg','png']
-	img_files  = []
-	for ext in extensions:
-		img_files += glob('%s/*.%s' % (folder,ext))
-		if upper:
-			img_files += glob('%s/*.%s' % (folder,ext.upper()))
-	return img_files
-
-
-def is_inside(ltest,lref):
-	return (ltest.tl() >= lref.tl()).all() and (ltest.br() <= lref.br()).all()
-
-
 def crop_region(I,label,bg=0.5):
-
+	'''
+	Returns image crop containing the licence plate
+	of a car inside its bounding box area
+	'''
 	wh = np.array(I.shape[1::-1])
 
 	ch = I.shape[2] if len(I.shape) == 3 else 1
@@ -92,32 +106,3 @@ def crop_region(I,label,bg=0.5):
 	Iout[offset[1]:(offset[1] + wh[1]),offset[0]:(offset[0] + wh[0])] = I[tl[1]:br[1],tl[0]:br[0]]
 
 	return Iout
-
-def hsv_transform(I,hsv_modifier):
-	I = cv2.cvtColor(I,cv2.COLOR_BGR2HSV)
-	I = I + hsv_modifier
-	return cv2.cvtColor(I,cv2.COLOR_HSV2BGR)
-
-def IOU(tl1,br1,tl2,br2):
-	wh1,wh2 = br1-tl1,br2-tl2
-	assert((wh1>=.0).all() and (wh2>=.0).all())
-	
-	intersection_wh = np.maximum(np.minimum(br1,br2) - np.maximum(tl1,tl2),0.)
-	intersection_area = np.prod(intersection_wh)
-	area1,area2 = (np.prod(wh1),np.prod(wh2))
-	union_area = area1 + area2 - intersection_area;
-	return intersection_area/union_area
-
-def IOU_centre_and_dims(cc1,wh1,cc2,wh2):
-	return IOU(cc1-wh1/2.,cc1+wh1/2.,cc2-wh2/2.,cc2+wh2/2.)
-
-
-def show(I,wname='Display'):
-	cv2.imshow(wname, I)
-	cv2.moveWindow(wname,0,0)
-	key = cv2.waitKey(0) & 0xEFFFFF
-	cv2.destroyWindow(wname)
-	if key == 27:
-		sys.exit()
-	else:
-		return key

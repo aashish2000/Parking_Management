@@ -1,64 +1,11 @@
-from numpy.lib.type_check 	import imag
-from darknet.darknet_images import load_images, image_detection
-from src.label				import dknet_label_conversion, Label
-from src.utils 				import im2single, nms, crop_region
+from src.label              import dknet_label_conversion, Label
+from src.utils 				import im2single, nms, crop_region, draw_boxes, draw_licence_plate, bbox2points
 from src.keras_utils 		import load_model, detect_lp
-import imutils
+from copy                   import deepcopy
 import darknet.darknet
 import numpy as np
-import sys
-from copy import deepcopy
-import cv2
 import datetime
-import random
-
-def draw_boxes(detections, image):
-    for label, confidence, bbox in detections:
-        left, top, right, bottom = bbox2points(bbox)
-        cv2.rectangle(image, (left, top), (right, bottom), (0,255,0), 1)
-        cv2.putText(image, "{}".format(label.decode('ascii')),
-                    (left, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                    (0,0,255), 2)
-    return image
-
-def draw_licence_plate(car_detection, image, licence_str):
-    left, top, right, bottom = bbox2points(car_detection[2])
-    cv2.putText(image, "{}".format(licence_str), ((left+right)//2, (top+bottom)//2), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255), 2)
-    return image
-
-def bbox2points(bbox):
-    '''
-    From bounding box yolo format
-    to corner points cv2 rectangle
-    '''
-    x, y, w, h = bbox
-    xmin = int(round(x - (w / 2)))
-    xmax = int(round(x + (w / 2)))
-    ymin = int(round(y - (h / 2)))
-    ymax = int(round(y + (h / 2)))
-    return xmin, ymin, xmax, ymax
-
-def resize_frame(input_frame,dimensions):
-    '''
-    Resize input frame to model input layer dimensions
-    original_widthile preserving aspect ratio of the image.
-    If the resized image is smaller than the required dimensions,
-    black borders are added to equalize the dimensions.
-    Else if the resized image is larger than the required dimensions,
-    the frame is centered and cropped to size.
-    '''
-
-    aspect_resized_frame = imutils.resize(input_frame, width = dimensions[1], inter=cv2.INTER_LINEAR)
-
-    if(aspect_resized_frame.shape[0] > dimensions[0]):
-        crop_len = (aspect_resized_frame.shape[0] - dimensions[0]) // 2
-        aspect_resized_frame = aspect_resized_frame[crop_len : crop_len + aspect_resized_frame.shape[0]][0 : dimensions[1]]
-    
-    elif(aspect_resized_frame.shape[0] < dimensions[0]):
-        border_len = (dimensions[0] - aspect_resized_frame.shape[0]) // 2
-        aspect_resized_frame = cv2.copyMakeBorder(aspect_resized_frame, border_len, border_len, 0, 0, cv2.BORDER_CONSTANT)
-    
-    return (aspect_resized_frame)
+import cv2
 
 
 def vehicle_detection(image_name, vehicle_net, vehicle_meta):
@@ -72,9 +19,9 @@ def vehicle_detection(image_name, vehicle_net, vehicle_meta):
     detections = [r for r in detections if r[0] in [b'car', b'bus', b"motorbike", b"truck"]]
 
     vehicle_bbox_image = draw_boxes(detections, image_name)
-    # print('\t\t%d cars found' % len(detections))
 
     return(detections, vehicle_bbox_image)
+
 
 def licence_plate_detection(image_original, cropped_car, wpod_net):
     '''
@@ -103,6 +50,7 @@ def licence_plate_detection(image_original, cropped_car, wpod_net):
 
     return(licence_coords, licence_images)
 
+
 def licence_plate_ocr(licence_image, ocr_net, ocr_meta):
     '''
     Extracts characters of the licence plate and orders them
@@ -130,6 +78,7 @@ def licence_plate_ocr(licence_image, ocr_net, ocr_meta):
     
     return(lp_str)
 
+
 def initialize_weights():
     # Initialize Vehicle Detection Model
     vehicle_weights = b'./data/vehicle-detector/yolov4-tiny.weights'
@@ -152,20 +101,25 @@ def initialize_weights():
 
     return(vehicle_net, vehicle_meta, wpod_net, ocr_net, ocr_meta)
 
+
 def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr_net, ocr_meta):
+
+    # Use datetime to generate unique string for naming result video
     start = datetime.datetime.now()
     save_path = 'output-{}.webm'.format(datetime.datetime.timestamp(start))
 
-    cap = cv2.VideoCapture(video_path)
-
     identified_cars_numberplates = {}
+
+    # Read Video frame by frame from path
+    cap = cv2.VideoCapture(video_path)
     
     frame = None
     if cap.isOpened():
         hasFrame, frame = cap.read()
     else:
         hasFrame = False
-    
+
+    # Write Result Video in .webm format for display in Browser window
     video_height, video_width = frame.shape[:2]
     save = cv2.VideoWriter("./static/results/"+save_path, cv2.VideoWriter_fourcc('V','P','8','0'), 30, (video_width,video_height))
 
@@ -175,31 +129,19 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
         # Perform Vehicle Detection
         detected_cars, vehicle_bbox_image = vehicle_detection(image_original, vehicle_net, vehicle_meta)
 
-        print("FRAME")
         if len(detected_cars):
             for i, cropped_car in enumerate(detected_cars):
+
                 # Perform Licence Plate Detection for every detected vehicle
                 licence_coords, licence_images = licence_plate_detection(image_original, cropped_car, wpod_net)
                 
                 if len(licence_coords):
                     licence_plate = licence_images[0]
-                    
-                    # Display Detected Licence Plate
-                    # cv2.imshow("window",licence_plate)
-                    # if cv2.waitKey() & 0xFF == ord('q'):
-                    #     break
 
                     # Perform Licence Plate Character Recognition
                     licence_str = licence_plate_ocr(licence_plate, ocr_net, ocr_meta)
                     identified_cars_numberplates[licence_str] = cropped_car[0].decode('ascii')
                     vehicle_bbox_image = draw_licence_plate(cropped_car, vehicle_bbox_image, licence_str)
-                    
-        # vehicle_bbox_image = cv2.cvtColor(vehicle_bbox_image, cv2.COLOR_RGB2BGR)
-        # vehicle_bbox_image = vehicle_bbox_image.astype(np.uint8)
-
-        # cv2.imshow("window",vehicle_bbox_image)
-        # if cv2.waitKey() & 0xFF == ord('q'):
-        #     break
         
         save.write(vehicle_bbox_image)
         hasFrame, frame = cap.read()
@@ -207,38 +149,4 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
     cap.release()
     save.release()
 
-    print(identified_cars_numberplates)
     return(save_path, "")
-
-
-
-# vehicle_net, vehicle_meta, wpod_net, ocr_net, ocr_meta = initialize_weights()
-# images = load_images(sys.argv[1])
-# width = darknet.darknet.network_width(vehicle_net)
-# height = darknet.darknet.network_width(vehicle_net)
-
-# for index in range(len(images)):
-#     image_name = images[index]
-#     image_original = cv2.imread(image_name)
-#     print(image_name)
-
-#     detected_cars = vehicle_detection(image_original, vehicle_net, vehicle_meta)
-
-#     if len(detected_cars):
-#         for i, cropped_car in enumerate(detected_cars):
-#             # Perform Licence Plate Detection for every detected vehicle
-#             licence_coords, licence_images = licence_plate_detection(image_original, cropped_car, wpod_net)
-            
-#             if len(licence_coords):
-#                 licence_plate = licence_images[0]
-                
-#                 # Display Detected Licence Plate
-#                 cv2.imshow("window",licence_plate)
-#                 if cv2.waitKey() & 0xFF == ord('q'):
-#                     break
-
-#                 # Perform Licence Plate Character Recognition
-#                 licence_plate_ocr(licence_plate, ocr_net, ocr_meta)
-
-    
-
