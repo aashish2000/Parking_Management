@@ -31,8 +31,11 @@ templates = Jinja2Templates(directory="templates")
 @app.get("/", response_class=HTMLResponse)
 async def display_home(request: Request):
     # Delete old videos from Server
-    os.remove("./static/uploaded_videos/*.mp4")
-    os.remove("./static/results/*.mp4")
+    try:
+        os.remove("./static/uploaded_videos/*.mp4")
+        os.remove("./static/results/*.mp4")
+    except:
+        pass
 
     # Return Home Page from templates
     return templates.TemplateResponse("home.html", {"request": request})

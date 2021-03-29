@@ -1,6 +1,9 @@
 
 import numpy as np
 import cv2
+import sys
+
+from glob import glob
 
 def IOU_labels(l1,l2):
 	return IOU(l1.tl(),l1.br(),l2.tl(),l2.br())
@@ -106,3 +109,7 @@ def crop_region(I,label,bg=0.5):
 	Iout[offset[1]:(offset[1] + wh[1]),offset[0]:(offset[0] + wh[0])] = I[tl[1]:br[1],tl[0]:br[0]]
 
 	return Iout
+
+
+def getWH(shape):
+	return np.array(shape[1::-1]).astype(float)

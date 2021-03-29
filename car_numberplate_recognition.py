@@ -108,7 +108,7 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
     start = datetime.datetime.now()
     save_path = 'output-{}.webm'.format(datetime.datetime.timestamp(start))
 
-    identified_cars_numberplates = {}
+    identified_cars_numberplates = ""
 
     # Read Video frame by frame from path
     cap = cv2.VideoCapture(video_path)
@@ -140,8 +140,9 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
                     # Perform Licence Plate Character Recognition
                     licence_str = licence_plate_ocr(licence_plate, ocr_net, ocr_meta)
-                    identified_cars_numberplates[licence_str] = cropped_car[0].decode('ascii')
                     vehicle_bbox_image = draw_licence_plate(cropped_car, vehicle_bbox_image, licence_str)
+
+                    identified_cars_numberplates += cropped_car[0].decode('ascii')+": "+licence_str+"\n"
         
         save.write(vehicle_bbox_image)
         hasFrame, frame = cap.read()
@@ -149,4 +150,5 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
     cap.release()
     save.release()
 
-    return(save_path, "")
+
+    return(save_path, identified_cars_numberplates)
