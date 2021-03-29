@@ -153,6 +153,6 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
     result_str = ""
 
     for key in identified_cars_numberplates:
-        result_str += identified_cars_numberplates[key]+": "+key+"<br />"
+        result_str += key+" "
 
     return(save_path, result_str)
