@@ -32,6 +32,11 @@
             height: auto   !important;
         }
 
+        img {
+            width: 35%    !important;
+            height: auto   !important;
+        }
+
         .padding-nn{
     		padding:10px;
         }
@@ -67,17 +72,22 @@
             <div class="break"></div>
 
             <div>
-                <h3> Vehicles Detected in the Video: </h3> <p> {{ head_count }} </p>
+                <h3> Vehicles Detected: </h3> <p> <h3 style="white-space: pre-wrap;" > {{ licence_count }} </h3> </p>
             </div>
 
             <div>
-                <video autoplay controls id="video_player" name="video_player">
-                    <source src={{ ['/static/results/', result_path] | join('') }} type="video/webm">
-                </video>
+                {% if flag == "img" %}
+                    <img src={{ ['/static/results/', result_path] | join('') }} alt="Processed Image">   
+                {% else %}
+                    <video autoplay controls id="video_player" name="video_player">
+                        <source src={{ ['/static/results/', result_path] | join('') }} type="video/webm">
+                    </video>
+                {% endif %}
+                
             </div>
             
             <div>
-                <input id="btn" class="rborder padding-nn" type="submit" value="Download Processed Video" name="down">
+                <input id="btn" class="rborder padding-nn" type="submit" value="Download Results" name="down">
                 <a href="/" class="rborder padding-nn">Back</a>
             </div>
 

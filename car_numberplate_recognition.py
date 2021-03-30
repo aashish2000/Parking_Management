@@ -108,6 +108,7 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
     start = datetime.datetime.now()
     save_path = 'output-{}.webm'.format(datetime.datetime.timestamp(start))
 
+    # Store identified vehicle numberplates
     identified_cars_numberplates = {}
 
     # Read Video frame by frame from path
@@ -152,7 +153,48 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
     result_str = ""
 
+    # Write Results to String for Display
     for key in identified_cars_numberplates:
-        result_str += key+" "
+        result_str += key+"\n "
+
+    return(save_path, result_str)
+
+
+def vehicle_detection_image(image_path, vehicle_net, vehicle_meta, wpod_net, ocr_net, ocr_meta):
+    # Use datetime to generate unique string for naming result image
+    start = datetime.datetime.now()
+    save_path = 'output-{}.jpg'.format(datetime.datetime.timestamp(start))
+
+    # Store identified vehicle numberplates
+    identified_cars_numberplates = {}
+
+    # Read Image by frame from path
+    image_original = cv2.imread(image_path)
+
+    # Perform Vehicle Detection
+    detected_cars, vehicle_bbox_image = vehicle_detection(image_original, vehicle_net, vehicle_meta)
+
+    if len(detected_cars):
+        for i, cropped_car in enumerate(detected_cars):
+
+            # Perform Licence Plate Detection for every detected vehicle
+            licence_coords, licence_images = licence_plate_detection(image_original, cropped_car, wpod_net)
+            
+            if len(licence_coords):
+                licence_plate = licence_images[0]
+
+                # Perform Licence Plate Character Recognition
+                licence_str = licence_plate_ocr(licence_plate, ocr_net, ocr_meta)
+                vehicle_bbox_image = draw_licence_plate(cropped_car, vehicle_bbox_image, licence_str)
+
+                identified_cars_numberplates[licence_str] = cropped_car[0].decode('ascii')
+
+    result_str = ""
+
+    # Write Results to String for Display
+    for key in identified_cars_numberplates:
+        result_str += key+"\n "
+    
+    cv2.imwrite("./static/results/"+save_path, vehicle_bbox_image)
 
     return(save_path, result_str)

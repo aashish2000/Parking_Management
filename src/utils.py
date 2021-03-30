@@ -15,10 +15,10 @@ def draw_boxes(detections, image):
     '''
     for label, confidence, bbox in detections:
         left, top, right, bottom = bbox2points(bbox)
-        cv2.rectangle(image, (left, top), (right, bottom), (0,255,0), 1)
+        cv2.rectangle(image, (left, top), (right, bottom), (0,255,0), 4)
         cv2.putText(image, "{}".format(label.decode('ascii')),
-                    (left, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                    (0,0,255), 2)
+                    (left, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 1.5,
+                    (0,0,255), 4)
     return image
 
 def draw_licence_plate(car_detection, image, licence_str):
@@ -27,7 +27,7 @@ def draw_licence_plate(car_detection, image, licence_str):
     given car inside its Bounding Box
     '''
     left, top, right, bottom = bbox2points(car_detection[2])
-    cv2.putText(image, "{}".format(licence_str), ((left+right)//2, (top+bottom)//2), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255), 2)
+    cv2.putText(image, "{}".format(licence_str), ((left+right)//2, (top+bottom)//2), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,0,255), 4)
     return image
 
 def bbox2points(bbox):

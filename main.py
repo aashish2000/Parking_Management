@@ -6,7 +6,7 @@ from fastapi.staticfiles            import StaticFiles
 from fastapi.templating             import Jinja2Templates
 from asgiref.sync                   import sync_to_async
 from fastapi.middleware.cors        import CORSMiddleware
-from car_numberplate_recognition    import initialize_weights, vehicle_detection_video
+from car_numberplate_recognition    import initialize_weights, vehicle_detection_video, vehicle_detection_image
 
 # Add Environment Variable for instructing the system to run inference on GPU
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -32,8 +32,16 @@ templates = Jinja2Templates(directory="templates")
 async def display_home(request: Request):
     # Delete old videos from Server
     try:
-        os.remove("./static/uploaded_videos/*.mp4")
-        os.remove("./static/results/*.mp4")
+        os.remove("./static/uploaded_videos/*.webm")
+        os.remove("./static/uploaded_videos/*.jpg")
+        os.remove("./static/uploaded_videos/*.png")
+        os.remove("./static/uploaded_videos/*.jpeg")
+        os.remove("./static/uploaded_videos/*.bmp")
+        os.remove("./static/results/*.webm")
+        os.remove("./static/results/*.jpg")
+        os.remove("./static/results/*.png")
+        os.remove("./static/results/*.jpeg")
+        os.remove("./static/results/*.bmp")
     except:
         pass
 
@@ -44,29 +52,33 @@ async def display_home(request: Request):
 @app.post("/video_upload")
 async def video_receive(request: Request):
     body = await request.form()
-    video_name = "./static/uploaded_videos/" + body["fileToUpload"].filename
+    file_name = "./static/uploaded_videos/" + body["fileToUpload"].filename
     contents = await body["fileToUpload"].read()
 
-    with open(video_name,"wb") as f:
+    with open(file_name,"wb") as f:
         f.write(contents)
-    
-    # Convert Video Format for viewing in a Browser
-    command = "ffmpeg -y -i " + video_name + " -c:v libx264 -c:a libfaac -movflags +faststart " + "./static/uploaded_videos/" + ".".join((body["fileToUpload"].filename).split(".")[:-1])+".mp4"
-    subprocess.call(command, shell=True)
-
 
 # Process Uploaded Videos from Clients
 @app.post("/process", response_class=HTMLResponse)
 async def video_receive(request: Request):
     body = await request.form()
-    video_name = "./static/uploaded_videos/"+body["file_name"]
-    
-    result_video, heads = await sync_to_async(vehicle_detection_video)(video_name, vehicle_net, vehicle_meta, wpod_net, ocr_net, ocr_meta)
-    return templates.TemplateResponse("show_result.html", {"request": request, "result_path": result_video, "head_count": heads})
+    file_name = "./static/uploaded_videos/"+body["file_name"]
+    flag = ""
+
+    if (file_name.split(".")[-1] in ["jpg", "png", "bmp", "jpeg"]):
+        result_file, numberplate_results = await sync_to_async(vehicle_detection_image)(file_name, vehicle_net, vehicle_meta, wpod_net, ocr_net, ocr_meta)
+        flag = "img"
+
+    else:
+        result_file, numberplate_results = await sync_to_async(vehicle_detection_video)(file_name, vehicle_net, vehicle_meta, wpod_net, ocr_net, ocr_meta)
+        flag = "vid"
+
+    return templates.TemplateResponse("show_result.html", {"request": request, "result_path": result_file, "licence_count": numberplate_results, "flag": flag})
 
 # Download Processed Videos
 @app.post("/download", response_class=FileResponse)
 async def download_video(file_name: str = Form(...)):
+
     return FileResponse("./static/results/"+file_name, media_type='application/octet-stream', filename=file_name)
 
 # Enable for providing global access URL

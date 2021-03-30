@@ -34,7 +34,7 @@ This project aims at efficiently handling vehicle parking services across parkin
 - Python 3.6+
 
 ### Installation
-- To install required packages:<br>
+- To install required packages on local system:<br>
 ```bash
 pip install -r requirements.txt
 ```
@@ -43,6 +43,7 @@ pip install -r requirements.txt
 ```
 GPU = 0
 CUDNN = 0
+CUDNN_HALF = 0
 ```
 
 - Building YOLO Darknet Binaries

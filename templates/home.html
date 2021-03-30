@@ -57,8 +57,17 @@
                         var filename = $('input[type=file]').val().replace(/C:\\fakepath\\/i, '');
                         var split_files = filename.split(".");
                         var len_file = split_files.length;
-                        var new_filename = split_files.slice(0, len_file-1).join(".") + ".mp4";
-                        $("#video_player").html("<source src='/static/uploaded_videos/"+new_filename+"' type='video/webm'>");
+
+                        var extension = filename.substr( (filename.lastIndexOf('.') +1) );
+
+                        if(extension == "webm")
+                        {
+                            $("#file_display").html("<video autoplay controls id='video_player' name='video_player'><source src='/static/uploaded_videos/" + filename + "' type='video/webm'></video>");
+                        }
+                        else
+                        {
+                            $("#file_display").html("<img src='/static/uploaded_videos/" + filename + "' alt='Uploaded Image'>");
+                        }
                         $("#file_name").val(filename);
                         $("#process_form").toggle();
                         $("#loader1").html("")
@@ -158,6 +167,11 @@
             height: auto   !important;
         }
 
+        img {
+            width: 35%    !important;
+            height: auto   !important;
+        }
+
         .center-div-nn{
     		text-align: center;
     		display: flex;
@@ -190,12 +204,12 @@
             <h1 class="padding-nn">Parking Management and Vehicle Location Tracking</h1>
             
             <div class="rborder padding-nn">
-                <label for="fileToUpload"> Select the Video Feed: </label>
+                <label for="fileToUpload"> Select the File to Upload: </label>
                 <input type="file" class="rborder" name="fileToUpload" id="fileToUpload">
             </div>
 
             <div>
-                <input id="btn" class="rborder padding-nn" type="button" value="Upload Video" name="submit">
+                <input id="btn" class="rborder padding-nn" type="button" value="Upload File" name="submit">
                 <center><div id = "loader1" name="loader1" class="padding-nn"></div></center>
             </div>
 
@@ -207,13 +221,13 @@
         <form hidden action="/process" name="process_form" id="process_form" method="post" onsubmit="loading('loader2');">
             
             <center>
-                <div>
-                    <video autoplay controls id="video_player" name="video_player"></video>
+                <div id="file_display" name="file_display">
+                    <!-- <video autoplay controls id="video_player" name="video_player"></video> -->
                 </div>
 
                 <div>
                     <input type="hidden" id="file_name" name="file_name">
-                    <input id="sub_button" name="sub_button" type="submit" value="Process Video" class="rborder padding-nn">
+                    <input id="sub_button" name="sub_button" type="submit" value="Process File" class="rborder padding-nn">
                    <div id = "loader2" name="loader2" class="padding-nn"></div>
                 </div>
             
