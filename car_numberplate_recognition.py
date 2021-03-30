@@ -2,6 +2,7 @@ from src.label              import dknet_label_conversion, Label
 from src.utils 				import im2single, nms, crop_region, draw_boxes, draw_licence_plate, bbox2points
 from src.keras_utils 		import load_model, detect_lp
 from copy                   import deepcopy
+from collections            import defaultdict
 import darknet.darknet
 import numpy as np
 import datetime
@@ -110,6 +111,7 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
     # Store identified vehicle numberplates
     identified_cars_numberplates = {}
+    identified_licence_freq = defaultdict(int)
 
     # Read Video frame by frame from path
     cap = cv2.VideoCapture(video_path)
@@ -144,6 +146,7 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
                     vehicle_bbox_image = draw_licence_plate(cropped_car, vehicle_bbox_image, licence_str)
 
                     identified_cars_numberplates[licence_str] = cropped_car[0].decode('ascii')
+                    identified_licence_freq[licence_str] += 1
         
         save.write(vehicle_bbox_image)
         hasFrame, frame = cap.read()
@@ -155,7 +158,7 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
     # Write Results to String for Display
     for key in identified_cars_numberplates:
-        if(len(key) >= 8):
+        if(len(key) >= 8 and identified_licence_freq[key] > 30):
             result_str += key+"\n "
 
     return(save_path, result_str)
@@ -168,6 +171,7 @@ def vehicle_detection_image(image_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
     # Store identified vehicle numberplates
     identified_cars_numberplates = {}
+    identified_licence_freq = defaultdict(int)
 
     # Read Image by frame from path
     image_original = cv2.imread(image_path)
@@ -189,12 +193,13 @@ def vehicle_detection_image(image_path, vehicle_net, vehicle_meta, wpod_net, ocr
                 vehicle_bbox_image = draw_licence_plate(cropped_car, vehicle_bbox_image, licence_str)
 
                 identified_cars_numberplates[licence_str] = cropped_car[0].decode('ascii')
+                identified_licence_freq[licence_str] += 1
 
     result_str = ""
 
     # Write Results to String for Display
     for key in identified_cars_numberplates:
-        if(len(key) >= 8):
+        if(len(key) >= 8 and identified_licence_freq[key] > 30):
             result_str += key+"\n "
     
     cv2.imwrite("./static/results/"+save_path, vehicle_bbox_image)
