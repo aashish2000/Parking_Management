@@ -155,7 +155,8 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
     # Write Results to String for Display
     for key in identified_cars_numberplates:
-        result_str += key+"\n "
+        if(len(key) >= 8):
+            result_str += key+"\n "
 
     return(save_path, result_str)
 
