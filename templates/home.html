@@ -60,7 +60,7 @@
 
                         var extension = filename.substr( (filename.lastIndexOf('.') +1) );
 
-                        if(extension == "webm")
+                        if(extension == "webm" || extension == "mp4" || extension == "MOV")
                         {
                             $("#file_display").html("<video autoplay controls id='video_player' name='video_player'><source src='/static/uploaded_videos/" + filename + "' type='video/webm'></video>");
                         }

@@ -193,7 +193,8 @@ def vehicle_detection_image(image_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
     # Write Results to String for Display
     for key in identified_cars_numberplates:
-        result_str += key+"\n "
+        if(len(key) >= 8):
+            result_str += key+"\n "
     
     cv2.imwrite("./static/results/"+save_path, vehicle_bbox_image)
 
