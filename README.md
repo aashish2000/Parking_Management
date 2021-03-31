@@ -61,17 +61,17 @@ To test out the repository on Google Colab, [click on this link](https://colab.r
 
 ## Screenshots
 
-<span class="img_container center" style="display: block;">
+<span class="img_container center" style="display: block; text-align: center;">
     <img alt="test" src="./assets/home.png" style="display:block; margin-left: auto; margin-right: auto;" title="caption" />
     <span class="img_caption" style="display: block; text-align: center;">File Upload UI</span>
 </span><br><br>
 
-<span class="img_container center" style="display: block;">
+<span class="img_container center" style="display: block; text-align: center;">
     <img alt="test" src="./assets/file_upload.png" style="display:block; margin-left: auto; margin-right: auto;" title="caption" />
     <span class="img_caption" style="display: block; text-align: center;">Preview Uploaded Image/Video</span>
 </span><br><br>
 
-<span class="img_container center" style="display: block;">
+<span class="img_container center" style="display: block; text-align: center;">
     <img alt="test" src="./assets/result.png" style="display:block; margin-left: auto; margin-right: auto;" title="caption" />
     <span class="img_caption" style="display: block; text-align: center;">View Detected cars and their Licence Plate Info</span>
 </span><br><br>
