@@ -19,7 +19,7 @@ This project aims at efficiently handling vehicle parking services across parkin
 - ALPR is handled using a custom Keras Model for Licence Plate Detection and a YOLO based Detector for performing Numberplate character OCR
 
 ## Packages Used
-- TensorFlow - 1.15.4
+- TensorFlow - 1.15.4 (CPU) / TensorFlow 1.13.1 (GPU - Colab) 
 - Keras - 2.2.4
 - FastAPI
 - OpenCV
@@ -58,6 +58,7 @@ python main.py
 ```
 
 To test out the repository on Google Colab, [click on this link](https://colab.research.google.com/drive/1QljiKUGbN4uaLOo8leRWZYxHummz376k?usp=sharing)
+
 ## References
 
 - Vehicle Detection: <https://arxiv.org/abs/2011.04244>

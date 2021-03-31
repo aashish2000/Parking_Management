@@ -128,7 +128,7 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
     save = cv2.VideoWriter("./static/results/"+save_path, cv2.VideoWriter_fourcc('V','P','8','0'), 30, (video_width,video_height))
 
     while hasFrame:
-        if(frame_count % 20 == 0):
+        if(frame_count % 30 == 0):
             frame_count = 0
             image_original = frame
 
@@ -177,7 +177,6 @@ def vehicle_detection_image(image_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
     # Store identified vehicle numberplates
     identified_cars_numberplates = {}
-    identified_licence_freq = defaultdict(int)
 
     # Read Image by frame from path
     image_original = cv2.imread(image_path)
@@ -199,13 +198,13 @@ def vehicle_detection_image(image_path, vehicle_net, vehicle_meta, wpod_net, ocr
                 vehicle_bbox_image = draw_licence_plate(cropped_car, vehicle_bbox_image, licence_str)
 
                 identified_cars_numberplates[licence_str] = cropped_car[0].decode('ascii')
-                identified_licence_freq[licence_str] += 1
+
 
     result_str = ""
 
     # Write Results to String for Display
     for key in identified_cars_numberplates:
-        if(len(key) >= 8 and identified_licence_freq[key] > 15):
+        if(len(key) >= 8):
             result_str += key+"\n "
     
     cv2.imwrite("./static/results/"+save_path, vehicle_bbox_image)
