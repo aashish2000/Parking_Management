@@ -117,6 +117,7 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
     cap = cv2.VideoCapture(video_path)
     
     frame = None
+    frame_count = 0
     if cap.isOpened():
         hasFrame, frame = cap.read()
     else:
@@ -127,26 +128,31 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
     save = cv2.VideoWriter("./static/results/"+save_path, cv2.VideoWriter_fourcc('V','P','8','0'), 30, (video_width,video_height))
 
     while hasFrame:
-        image_original = frame
+        if(frame_count % 20 == 0):
+            frame_count = 0
+            image_original = frame
 
-        # Perform Vehicle Detection
-        detected_cars, vehicle_bbox_image = vehicle_detection(image_original, vehicle_net, vehicle_meta)
+            # Perform Vehicle Detection
+            detected_cars, vehicle_bbox_image = vehicle_detection(image_original, vehicle_net, vehicle_meta)
 
-        if len(detected_cars):
-            for i, cropped_car in enumerate(detected_cars):
+            if len(detected_cars):
+                for i, cropped_car in enumerate(detected_cars):
 
-                # Perform Licence Plate Detection for every detected vehicle
-                licence_coords, licence_images = licence_plate_detection(image_original, cropped_car, wpod_net)
-                
-                if len(licence_coords):
-                    licence_plate = licence_images[0]
+                    # Perform Licence Plate Detection for every detected vehicle
+                    licence_coords, licence_images = licence_plate_detection(image_original, cropped_car, wpod_net)
+                    
+                    if len(licence_coords):
+                        licence_plate = licence_images[0]
 
-                    # Perform Licence Plate Character Recognition
-                    licence_str = licence_plate_ocr(licence_plate, ocr_net, ocr_meta)
-                    vehicle_bbox_image = draw_licence_plate(cropped_car, vehicle_bbox_image, licence_str)
+                        # Perform Licence Plate Character Recognition
+                        licence_str = licence_plate_ocr(licence_plate, ocr_net, ocr_meta)
+                        vehicle_bbox_image = draw_licence_plate(cropped_car, vehicle_bbox_image, licence_str)
 
-                    identified_cars_numberplates[licence_str] = cropped_car[0].decode('ascii')
-                    identified_licence_freq[licence_str] += 1
+                        identified_cars_numberplates[licence_str] = cropped_car[0].decode('ascii')
+                        identified_licence_freq[licence_str] += 1
+        else:
+            frame_count += 1
+            vehicle_bbox_image = frame
         
         save.write(vehicle_bbox_image)
         hasFrame, frame = cap.read()
@@ -158,7 +164,7 @@ def vehicle_detection_video(video_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
     # Write Results to String for Display
     for key in identified_cars_numberplates:
-        if(len(key) >= 8 and identified_licence_freq[key] > 30):
+        if(len(key) >= 8 and identified_licence_freq[key] > 15):
             result_str += key+"\n "
 
     return(save_path, result_str)
@@ -199,7 +205,7 @@ def vehicle_detection_image(image_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
     # Write Results to String for Display
     for key in identified_cars_numberplates:
-        if(len(key) >= 8 and identified_licence_freq[key] > 30):
+        if(len(key) >= 8 and identified_licence_freq[key] > 15):
             result_str += key+"\n "
     
     cv2.imwrite("./static/results/"+save_path, vehicle_bbox_image)
