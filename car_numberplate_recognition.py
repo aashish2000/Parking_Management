@@ -1,6 +1,6 @@
 from src.label              import dknet_label_conversion, Label
-from src.utils 				import im2single, nms, crop_region, draw_boxes, draw_licence_plate, bbox2points
-from src.keras_utils 		import load_model, detect_lp
+from src.utils              import im2single, nms, crop_region, draw_boxes, draw_licence_plate, bbox2points
+from src.keras_utils        import load_model, detect_lp
 from copy                   import deepcopy
 from collections            import defaultdict
 import darknet.darknet

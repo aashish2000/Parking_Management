@@ -8,9 +8,6 @@ from asgiref.sync                   import sync_to_async
 from fastapi.middleware.cors        import CORSMiddleware
 from car_numberplate_recognition    import initialize_weights, vehicle_detection_video, vehicle_detection_image
 
-# Add Environment Variable for instructing the system to run inference on GPU
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
 # Initialize Models Weights
 vehicle_net, vehicle_meta, wpod_net, ocr_net, ocr_meta = initialize_weights()
 
@@ -48,6 +45,7 @@ async def display_home(request: Request):
     # Return Home Page from templates
     return templates.TemplateResponse("home.html", {"request": request})
 
+
 # Upload and Play Videos
 @app.post("/video_upload")
 async def video_receive(request: Request):
@@ -58,13 +56,15 @@ async def video_receive(request: Request):
     with open(file_name,"wb") as f:
         f.write(contents)
 
-# Process Uploaded Videos from Clients
+
+# Process Uploaded Videos/Images from Clients
 @app.post("/process", response_class=HTMLResponse)
 async def video_receive(request: Request):
     body = await request.form()
     file_name = "./static/uploaded_videos/"+body["file_name"]
     flag = ""
 
+    # Run Inference in Async Mode
     if (file_name.split(".")[-1] in ["jpg", "png", "bmp", "jpeg"]):
         result_file, numberplate_results = await sync_to_async(vehicle_detection_image)(file_name, vehicle_net, vehicle_meta, wpod_net, ocr_net, ocr_meta)
         flag = "img"
@@ -75,11 +75,12 @@ async def video_receive(request: Request):
 
     return templates.TemplateResponse("show_result.html", {"request": request, "result_path": result_file, "licence_count": numberplate_results, "flag": flag})
 
-# Download Processed Videos
+
+# Download Processed Videos/Images
 @app.post("/download", response_class=FileResponse)
 async def download_video(file_name: str = Form(...)):
-
     return FileResponse("./static/results/"+file_name, media_type='application/octet-stream', filename=file_name)
+
 
 # Enable for providing global access URL
 import nest_asyncio

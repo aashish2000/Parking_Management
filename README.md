@@ -57,7 +57,7 @@ cd darknet && make
 python main.py
 ```
 
-To test out the repository on Google Colab, [click on this link](https://colab.research.google.com/drive/1QljiKUGbN4uaLOo8leRWZYxHummz376k?usp=sharing)
+To test out the repository on Google Colab, check out the [notebooks folder](./notebooks/Parking_Management_Demo.ipynb)
 
 ## Screenshots
 
