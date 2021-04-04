@@ -27,7 +27,7 @@ def draw_licence_plate(car_detection, image, licence_str):
     given car inside its Bounding Box
     '''
     left, top, right, bottom = bbox2points(car_detection[2])
-    cv2.putText(image, "{}".format(licence_str), ((left+right)//2, (top+bottom)//2), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,0,255), 4)
+    cv2.putText(image, "{}".format(licence_str), ((left+right)//2-100, (top+bottom)//2), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,0,255), 4)
     return image
 
 def bbox2points(bbox):

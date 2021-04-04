@@ -57,7 +57,7 @@ def licence_plate_ocr(licence_image, ocr_net, ocr_meta):
     Extracts characters of the licence plate and orders them
     to return the predicted licence plate of a vehicle
     '''
-    ocr_threshold = .4
+    ocr_threshold = .2
     licence_image *= 255.
 
     ocr_net_width = darknet.darknet.network_width(ocr_net)
@@ -204,7 +204,7 @@ def vehicle_detection_image(image_path, vehicle_net, vehicle_meta, wpod_net, ocr
 
     # Write Results to String for Display
     for key in identified_cars_numberplates:
-        if(len(key) >= 8):
+        if(len(key) >= 7):
             result_str += key+"\n "
     
     cv2.imwrite("./static/results/"+save_path, vehicle_bbox_image)
